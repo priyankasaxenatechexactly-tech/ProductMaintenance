@@ -1,0 +1,30 @@
+@model ProductMaintenance.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h4 class="mb-4 text-center">Login</h4>
+                    <form asp-action="Login" asp-controller="Account" method="post">
+                        @Html.AntiForgeryToken()
+                        @* <div class="text-danger mb-2">@Html.ValidationSummary()</div> *@
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" />
+                            <span class="text-danger" asp-validation-for="Email"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label"></label>
+                            <input asp-for="Password" class="form-control" type="password" />
+                            <span class="text-danger" asp-validation-for="Password"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Sign In</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

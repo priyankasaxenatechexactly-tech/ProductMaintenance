@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ProductMaintenance.styles.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" />
+</head>
+<body>
+    @{ var ctrl = (ViewContext.RouteData.Values["controller"]?.ToString() ?? "");
+       var act = (ViewContext.RouteData.Values["action"]?.ToString() ?? "");
+       bool isAuthenticated = User?.Identity?.IsAuthenticated == true; }
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-0">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-controller="Dashboard" asp-action="Index">Product Maintenance</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1"></ul>
+                </div>
+                @* Top-right Logout button when authenticated and not on Account page *@
+                @if (isAuthenticated && !string.Equals(ctrl, "Account", StringComparison.OrdinalIgnoreCase))
+                {
+                    <div class="d-flex align-items-center ms-auto">
+                        <span class="me-2 small text-muted">@User?.Identity?.Name</span>
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm" style="background-color:#0d6efd;border-color:#0d6efd;color:#fff;">Logout</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </nav>
+    </header>
+    
+
+    @if (!isAuthenticated)
+    {
+        <div class="container">
+            <main role="main" class="p-4">
+                @RenderBody()
+            </main>
+        </div>
+    }
+    else
+    {
+        <div class="container-fluid">
+            <div class="row">
+                <aside class="col-12 col-md-3 col-lg-2 col-xl-2 border-end min-vh-100 px-0">
+                    <div class="list-group list-group-flush">
+                        
+                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2 @(ctrl == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index">
+                            <span class="ap nav-icon-circle me-2" style="background:#0d6efd;color:#fff;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                                    <path d="M8 4a.5.5 0 0 1 .5.5v3.707l2.146 2.147a.5.5 0 0 1-.708.707l-2.2-2.2A.5.5 0 0 1 7.5 9V4.5A.5.5 0 0 1 8 4z"/>
+                                    <path d="M6.664 15a2 2 0 0 1-1.789-1.106l-.522-1.045a7 7 0 1 1 7.314 0l-.522 1.045A2 2 0 0 1 9.336 15H6.664z"/>
+                                </svg>
+                            </span>
+                            <p class="m-0">Dashboard</p>
+                        </a>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a class="list-group-item list-group-item-action d-flex align-items-center gap-2 @(ctrl == "User" ? "active" : "")" asp-controller="User" asp-action="Index">
+                                <span class="ap nav-icon-circle me-2" style="background:#6f42c1;color:#fff;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                                        <path d="M13 7a3 3 0 1 0-2.236-5.001A4 4 0 0 1 14 6v1h-1z"/>
+                                        <path d="M5 8a3 3 0 1 0-2.236-5.001A4 4 0 0 1 6 7v1H5z"/>
+                                        <path d="M11 8a3 3 0 0 0-6 0v1h6V8z"/>
+                                        <path d="M0 13a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1H0v-1z"/>
+                                    </svg>
+                                </span>
+                                <p class="m-0">User</p>
+                            </a>
+                        }
+                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2 @(ctrl == "Product" ? "active" : "")" asp-controller="Product" asp-action="Index">
+                            <span class="ap nav-icon-circle me-2" style="background:#20c997;color:#fff;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                                    <path d="M8.186 1.113a1 1 0 0 0-.372 0L1.5 2.5 8 4l6.5-1.5-6.314-1.387z"/>
+                                    <path d="M14 5.5 8 7 2 5.5V13a1 1 0 0 0 .8.98l5 1a1 1 0 0 0 .4 0l5-1A1 1 0 0 0 14 13V5.5z"/>
+                                </svg>
+                            </span>
+                            <p class="m-0">Product</p>
+                        </a>
+                    </div>
+                </aside>
+                <main role="main" class="col-12 col-md-9 col-lg-10 col-xl-10 p-4">
+                    @RenderBody()
+                </main>
+            </div>
+        </div>
+    }
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @* Fixed-position overlay banner that does not affect layout *@
+    <div id="pm-overlay" style="position:fixed;left:50%;top:24px;transform:translateX(-50%);z-index:1080;pointer-events:none;">
+        @if (TempData["Error"] != null)
+        {
+            <div class="px-4 py-2 rounded shadow" style="background:#dc3545;color:#fff;min-width:320px;max-width:90vw;text-align:center;opacity:1;transition:opacity .4s ease, transform .4s ease;">
+                <span class="me-2 material-icons align-middle">error</span>
+                @TempData["Error"]
+            </div>
+        }
+        else if (TempData["Success"] != null)
+        {
+            <div class="px-4 py-2 rounded shadow" style="background:#198754;color:#fff;min-width:320px;max-width:90vw;text-align:center;opacity:1;transition:opacity .4s ease, transform .4s ease;">
+                <span class="me-2 material-icons align-middle">check_circle</span>
+                @TempData["Success"]
+            </div>
+        }
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const overlay = document.getElementById('pm-overlay');
+            if (!overlay) return;
+            const banner = overlay.querySelector('div');
+            if (!banner) return;
+            const isError = (banner.innerText || '').toLowerCase().includes('error');
+            const delay = isError ? 3500 : 2500;
+            setTimeout(() => {
+                banner.style.opacity = '0';
+                banner.style.transform = 'translateY(-6px)';
+                setTimeout(() => {
+                    overlay.remove();
+                }, 450);
+            }, delay);
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

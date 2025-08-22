@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProductMaintenance.Models\ProductMaintenance.Models.csproj" />
+    <ProjectReference Include="..\ProductMaintenance.DataAccess\ProductMaintenance.DataAccess.csproj" />
+    <ProjectReference Include="..\ProductMaintenance.Entity\ProductMaintenance.Entity.csproj" />
+    <ProjectReference Include="..\ProductMaintenance.Business\ProductMaintenance.Business.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Models\**" />
+    <Compile Remove="Data\**" />
+    <Compile Remove="Repositories\**" />
+  </ItemGroup>
+
+  <!-- Re-include ErrorViewModel for Razor views -->
+  <ItemGroup>
+    <Compile Include="Models\ErrorViewModel.cs" />
+  </ItemGroup>
+
+</Project>

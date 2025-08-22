@@ -1,0 +1,117 @@
+@model ProductMaintenance.Models.DashboardViewModel
+@{
+    Layout = null;
+    var colsMd = User.IsInRole("Admin") ? "row-cols-md-3" : "row-cols-md-2";
+}
+<div class="container-fluid py-4">
+    <div class="row row-cols-1 @colsMd g-4">
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="col">
+                <div class="card shadow-sm border-0 h-100 position-relative" style="overflow:hidden;">
+                    <span style="position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#ffc2d6,#ffe0e9);"></span>
+                    <div class="card-body py-3 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-primary fw-semibold small text-uppercase mb-1">Total Users</div>
+                            <div class="fs-2 fw-bold mb-0">@Model.TotalUsers</div>
+                        </div>
+                        <i class="bi bi-people-fill" style="font-size:1.6rem;color:#d63384;opacity:.85;"></i>
+                        <a href="@Url.Action("Index","User")" class="stretched-link" aria-label="View users"></a>
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="col">
+            <div class="card shadow-sm border-0 h-100 position-relative" style="overflow:hidden;">
+                <span style="position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#b8d8ff,#e7f5ff);"></span>
+                <div class="card-body py-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-primary fw-semibold small text-uppercase mb-1">Total Products</div>
+                        <div class="fs-2 fw-bold mb-0">@Model.TotalProducts</div>
+                    </div>
+                    <i class="bi bi-box-seam" style="font-size:1.6rem;color:#0d6efd;opacity:.85;"></i>
+                    <a href="@Url.Action("Index","Product")" class="stretched-link" aria-label="View products"></a>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card shadow-sm border-0 h-100 position-relative" style="overflow:hidden;">
+                <span style="position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#ffd9b3,#fff4e6);"></span>
+                <div class="card-body py-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-primary fw-semibold small text-uppercase mb-1">Low Stock (&lt; 10)</div>
+                        <div class="fs-2 fw-bold mb-0">@Model.LowStockCount</div>
+                    </div>
+                    <i class="bi bi-exclamation-triangle-fill" style="font-size:1.6rem;color:#fd7e14;opacity:.9;"></i>
+                    <a href="@Url.Action("Index","Product")" class="stretched-link" aria-label="View low stock products"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">Products per Category</h5>
+                </div>
+                <div class="card-body">
+                    <div class="ratio ratio-21x9">
+                        <canvas id="productsPerCategory"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    (function(){
+        const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Categories));
+        const values = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoryCounts));
+
+        const ctx = document.getElementById('productsPerCategory');
+        if (!ctx) return;
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Products',
+                    data: values,
+                    backgroundColor: ['#0d6efd','#198754','#ffc107','#dc3545','#20c997','#6f42c1','#fd7e14','#0dcaf0','#6610f2','#6c757d'],
+                    borderWidth: 0,
+                    barThickness: 24,
+                    maxBarThickness: 28,
+                    categoryPercentage: 0.6,
+                    barPercentage: 0.8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    title: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        min: 0,
+                        max: 50,
+                        grid: { display: false, drawBorder: false },
+                        ticks: { precision: 0, stepSize: 10, font: { weight: 'bold' } },
+                        title: { display: true, text: 'Number of Products', font: { weight: 'bold' } }
+                    },
+                    x: {
+                        grid: { display: false, drawBorder: false },
+                        ticks: { font: { weight: 'bold' } },
+                        title: { display: true, text: 'Categories', font: { weight: 'bold' } }
+                    }
+                }
+            }
+        });
+    })();
+</script>

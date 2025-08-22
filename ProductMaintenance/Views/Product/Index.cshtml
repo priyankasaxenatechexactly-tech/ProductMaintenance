@@ -1,0 +1,108 @@
+@model ProductMaintenance.Models.PagedResult<ProductMaintenance.Models.ProductListItem>
+@{
+    ViewData["Title"] = "Products";
+}
+<div class="container py-3">
+    <h2 class="mb-3">Products</h2>
+    <div class="row g-2 mb-3 align-items-center">
+        <div class="col-sm-6 col-md-6 col-lg-6">
+            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+            {
+                <a asp-action="Create" class="btn btn-success">Create New</a>
+            }
+        </div>
+        <div class="col-sm-6 col-md-6 col-lg-6 text-end" id="productToolbar"></div>
+    </div>
+
+    <div class="table-responsive">
+        <table id="productTable" class="table table-striped table-bordered align-middle">
+            <thead>
+            <tr>
+                <th style="width:40%">Product</th>
+                <th>Category</th>
+                <th class="text-end">Price</th>
+                <th class="text-end">Stock</th>
+                <th class="text-end" style="width:120px">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            @{
+                                var defaultImg = Url.Content("~/uploads/products/DefaultProduct.jfif");
+                                string ResolveImg(string? url)
+                                {
+                                    if (string.IsNullOrWhiteSpace(url)) return defaultImg;
+                                    if (url.StartsWith("http://") || url.StartsWith("https://")) return url;
+                                    // Ensure leading slash and map to web root
+                                    var normalized = url.StartsWith("/") ? url : "/" + url;
+                                    return Url.Content("~" + normalized);
+                                }
+                                var imgSrc = ResolveImg(item.ImageUrl);
+                            }
+                            <a href="@imgSrc" target="_blank" rel="noopener noreferrer">
+                                <img src="@imgSrc" alt="@item.Name" class="rounded-circle" style="width:48px;height:48px;object-fit:cover"
+                                     onerror="this.onerror=null;this.src='@defaultImg'; if (this.parentElement) this.parentElement.href='@defaultImg';" />
+                            </a>
+                            <div class="fw-semibold">@item.Name</div>
+                        </div>
+                    </td>
+                    <td>@item.Category</td>
+                    <td class="text-end">@item.Price.ToString("C")</td>
+                    <td class="text-end">@item.StockQuantity</td>
+                    <td class="text-end">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary me-2" title="Edit" aria-label="Edit">
+                            <span class="material-icons" aria-hidden="true">edit</span>
+                        </a>
+                        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                        {
+                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this product?');" title="Delete" aria-label="Delete">
+                                    <span class="material-icons" aria-hidden="true">delete</span>
+                                </button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            var table = $('#productTable').DataTable({
+                pageLength: 10,
+                lengthChange: false,
+                order: [],
+                columnDefs: [
+                    { orderable: false, targets: -1 } // actions
+                ]
+            });
+
+            // Move the DataTables search box into our toolbar right column
+            var filter = $('#productTable_filter');
+            if (filter.length) {
+                // Move into toolbar
+                filter.addClass('mb-0 d-inline-flex align-items-center');
+                $('#productToolbar').empty().append(filter);
+                // Remove any label text and keep only input for a cleaner UI
+                var label = filter.find('label');
+                if (label.length) {
+                    label.contents().filter(function(){ return this.nodeType === Node.TEXT_NODE; }).remove();
+                    label.addClass('mb-0');
+                }
+                // Input styling
+                var input = filter.find('input');
+                input.attr('placeholder', 'Search...')
+                     .addClass('form-control form-control-sm')
+                     .css('width', '240px');
+            }
+        });
+    </script>
+}

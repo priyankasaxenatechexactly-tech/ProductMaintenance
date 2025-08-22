@@ -1,0 +1,76 @@
+@model ProductMaintenance.Models.ProductUpsertModel
+@{
+    ViewData["Title"] = Model.Id > 0 ? "Edit Product" : "Create Product";
+}
+<div class="container py-3">
+    <h2 class="mb-3">@ViewData["Title"]</h2>
+
+    <form asp-action="@(Model.Id > 0 ? "Edit" : "Create")" method="post" enctype="multipart/form-data" class="row g-3">
+        @if (Model.Id > 0)
+        {
+            <input type="hidden" asp-for="Id" />
+        }
+        <div class="col-md-6">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="Category" class="form-label"></label>
+            <select asp-for="Category" class="form-select">
+                <option value="">-- Select Category --</option>
+                @foreach (var c in Model.Categories)
+                {
+                    <option value="@c" selected="@(Model.Category == c ? "selected" : null)">@c</option>
+                }
+            </select>
+            <span asp-validation-for="Category" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="Price" class="form-label"></label>
+            <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" inputmode="decimal" pattern="^[0-9]*\.?[0-9]*$" value='@Model.Price.ToString("0.00")' oninput="this.value=this.value.replace(/[^0-9.]/g,''); if((this.value.match(/\./g)||[]).length>1){ this.value=this.value.replace(/\.(?=.*\.)/g,''); }" onblur="if(this.value===''){this.value='0.00';}else{var n=parseFloat(this.value); if(!isNaN(n)){this.value=n.toFixed(2);}else{this.value='0.00';}}" />
+            <span asp-validation-for="Price" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="StockQuantity" class="form-label"></label>
+            <input asp-for="StockQuantity" class="form-control" type="number" step="1" min="0" inputmode="numeric" />
+            <span asp-validation-for="StockQuantity" class="text-danger"></span>
+        </div>
+        <div class="col-12">
+            <label asp-for="Description" class="form-label"></label>
+            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Image</label>
+            <input type="file" name="imageFile" class="form-control" accept="image/*" />
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <div class="mt-2">
+                    <img src="@Model.ImageUrl" alt="preview" class="img-thumbnail" style="max-height:120px;" />
+                </div>
+            }
+        </div>
+        <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Ensure initial formatting to 2 decimals on load for price input
+        document.addEventListener('DOMContentLoaded', function(){
+            var price = document.querySelector('input[name="Price"]');
+            if (price) {
+                if (price.value === '' || isNaN(parseFloat(price.value))) {
+                    price.value = '0.00';
+                } else {
+                    price.value = parseFloat(price.value).toFixed(2);
+                }
+            }
+        });
+    </script>
+}

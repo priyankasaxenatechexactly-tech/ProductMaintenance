@@ -1,0 +1,162 @@
+@model ProductMaintenance.Models.UserUpsertModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-3">@ViewData["Title"]</h2>
+        <div class="card shadow-sm">
+            <div class="card-body">
+        <form asp-action="@(Model.Id == 0 ? "Create" : "Edit")" method="post" autocomplete="off">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="All" class="text-danger mb-2"></div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Name" class="form-label"></label>
+                    @if (Model.Id == 0)
+                    {
+                        <input asp-for="Name" class="form-control" required />
+                    }
+                    else
+                    {
+                        <input asp-for="Name" class="form-control" />
+                    }
+                    <span class="text-danger" asp-validation-for="Name"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="LastName" class="form-label"></label>
+                    @if (Model.Id == 0)
+                    {
+                        <input asp-for="LastName" class="form-control" required />
+                    }
+                    else
+                    {
+                        <input asp-for="LastName" class="form-control" />
+                    }
+                    <span class="text-danger" asp-validation-for="LastName"></span>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Email" class="form-label"></label>
+                    @if (Model.Id == 0)
+                    {
+                        <input asp-for="Email" class="form-control" type="email" autocomplete="off" required />
+                    }
+                    else
+                    {
+                        <input asp-for="Email" class="form-control" type="email" autocomplete="off" />
+                    }
+                    <span class="text-danger" asp-validation-for="Email"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Password" class="form-label"></label>
+                    <div class="input-group">
+                        @if (Model.Id == 0)
+                        {
+                            <input id="passwordInput" asp-for="Password" class="form-control" type="password" minlength="8" autocomplete="new-password" required placeholder="Enter new password" />
+                        }
+                        else
+                        {
+                            <!-- Use name=Password to ensure posting back, and force a masked value to appear on Edit -->
+                            <input id="passwordInput" name="Password" value="********" class="form-control" type="password" minlength="8" autocomplete="new-password" placeholder="Leave blank to keep current password" />
+                        }
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Show password">
+                            <span class="material-icons" aria-hidden="true">visibility</span>
+                        </button>
+                    </div>
+                    @if (Model.Id != 0)
+                    {
+                        <small class="text-muted">Leave blank to keep the current password. Enter a new password to change it.</small>
+                    }
+                    <span class="text-danger" asp-validation-for="Password"></span>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="UserTypeId" class="form-label">Role</label>
+                    @if (Model.Id == 0)
+                    {
+                        <select asp-for="UserTypeId" class="form-select" required
+                                asp-items="@(new SelectList(Model.Roles, nameof(ProductMaintenance.Models.RoleItem.Id), nameof(ProductMaintenance.Models.RoleItem.Name)))">
+                            <option value="">-- Select Role --</option>
+                        </select>
+                    }
+                    else
+                    {
+                        <select asp-for="UserTypeId" class="form-select"
+                                asp-items="@(new SelectList(Model.Roles, nameof(ProductMaintenance.Models.RoleItem.Id), nameof(ProductMaintenance.Models.RoleItem.Name)))">
+                            <option value="">-- Select Role --</option>
+                        </select>
+                    }
+                    <span class="text-danger" asp-validation-for="UserTypeId"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="MobileNo" class="form-label"></label>
+                    @if (Model.Id == 0)
+                    {
+                        <input id="mobileInput" asp-for="MobileNo" class="form-control" inputmode="numeric" autocomplete="off" maxlength="10" minlength="10" title="Enter exactly 10 digits" required />
+                    }
+                    else
+                    {
+                        <input id="mobileInput" asp-for="MobileNo" class="form-control" inputmode="numeric" autocomplete="off" maxlength="10" minlength="10" title="Enter exactly 10 digits" />
+                    }
+                    <span class="text-danger" asp-validation-for="MobileNo"></span>
+                </div>
+            </div>
+
+            <input type="hidden" asp-for="Id" />
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+            </div>
+        </form>
+            <script>
+                (function () {
+                    // Mobile: digits-only and max 10
+                    const mob = document.getElementById('mobileInput');
+                    if (mob) {
+                        mob.addEventListener('input', function () {
+                            // Strip non-digits
+                            let v = this.value.replace(/\D+/g, '');
+                            // Limit length
+                            if (v.length > 10) v = v.slice(0, 10);
+                            if (this.value !== v) this.value = v;
+                            // Clear any previous custom message while typing
+                            this.setCustomValidity('');
+                        });
+                        // Custom validation message on submit
+                        mob.addEventListener('invalid', function () {
+                            if (this.value.length !== 10) {
+                                this.setCustomValidity('Enter exactly 10 digits');
+                            } else {
+                                this.setCustomValidity('');
+                            }
+                        });
+                    }
+
+                    // Password show/hide toggle
+                    const pwd = document.getElementById('passwordInput');
+                    const btn = document.getElementById('togglePassword');
+                    if (pwd && btn) {
+                        btn.addEventListener('click', function () {
+                            const isHidden = pwd.type === 'password';
+                            pwd.type = isHidden ? 'text' : 'password';
+                            const icon = this.querySelector('.material-icons');
+                            if (icon) icon.textContent = isHidden ? 'visibility_off' : 'visibility';
+                            this.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+                        });
+                    }
+                })();
+            </script>
+            </div>
+        </div>
+    </div>
+</div>
+
